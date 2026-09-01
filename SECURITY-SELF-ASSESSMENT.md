@@ -110,7 +110,8 @@ Reconciliation can be extended through the [Gatekeeper plugin system](https://gi
 
 #### Topic Operator
 
-The Topic Operator manages `KafkaTopic` custom resources, creating, updating, and deleting Kafka topics to match the desired state declared in Kubernetes.
+The Topic Operator is an optional component that manages `KafkaTopic` custom resources, creating, updating, and deleting Kafka topics to match the desired state declared in Kubernetes.
+It can be enabled and configured via the `Kafka` CR.
 It can run in two modes: as a container within the Entity Operator pod alongside the User Operator when deployed as part of a Strimzi-managed Kafka cluster, or as a standalone deployment connecting to an external Kafka cluster.
 When deployed as part of a Strimzi-managed Kafka cluster, the security of the Kafka connection follows the cluster security configuration set via the `strimzi.io/internal-cluster-security` annotation: mTLS by default, but encryption and authentication are independently configurable and can each be disabled (see [SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)).
 In standalone mode, communication is secured via mTLS using certificates provided by the user.
@@ -120,7 +121,8 @@ The Topic Operator operates within a single namespace and uses the Kafka Admin A
 
 #### User Operator
 
-The User Operator manages `KafkaUser` custom resources, provisioning authentication credentials and authorization rules for Kafka clients.
+The User Operator is an optional component that manages `KafkaUser` custom resources, provisioning authentication credentials and authorization rules for Kafka clients.
+It can be enabled and configured via the `Kafka` CR.
 It creates TLS client certificates or SCRAM-SHA-512 passwords and stores them as Kubernetes Secrets in the same namespace as the KafkaUser resource.
 The User Operator synchronizes ACL rules and quotas to Kafka, ensuring that the Kafka-side configuration matches the declared desired state.
 Like the Topic Operator, it supports two deployment modes: within the Entity Operator pod as part of a Strimzi-managed Kafka cluster, or as a standalone deployment connecting to an external Kafka cluster.
@@ -147,7 +149,7 @@ The generated NetworkPolicy restricts the REST API port (8083) to the Cluster Op
 Deployments should prefer `KafkaConnector` custom resources for Kubernetes-RBAC-mediated management and avoid external exposure of the REST API unless an authenticated proxy or equivalent control is used.
 Connector plugins execute third-party code with the permissions and network access of the Connect workload and must be treated as trusted code.
 
-Kafka Connect includes a build functionality that uses `Buildah` (default) or `Kaniko` to create container images with additional connector plugins.
+Kafka Connect includes a build functionality that uses `Buildah` to create container images with additional connector plugins.
 To use this feature the build pods require elevated privileges that are less strict than `RestrictedPodSecurityProvider`.
 These can be configured within KafkaConnect custom resource.
 
@@ -374,9 +376,8 @@ Kafka authorization is configured at the cluster level through the broker author
 **RestrictedPodSecurityProvider.**
 The default pod security profile (as of 1.2.0) that sets `allowPrivilegeEscalation` to `false`, drops all Linux capabilities, enables the `RuntimeDefault` seccomp profile, and enforces `runAsNonRoot`.
 
-Kafka Connect build security requirements depend on the selected build backend and Kubernetes platform.
-The build functionality uses `Buildah` by default (the `UseConnectBuildWithBuildah` feature gate is enabled by default as of Strimzi 1.1.0); `Kaniko` remains available and can be selected by disabling the feature gate.
-Both backends require elevated privileges and security-context settings that are incompatible with the `RestrictedPodSecurityProvider`.
+Kafka Connect build security requirements depend on Kubernetes platform.
+`Buildah` require elevated privileges and security-context settings that are incompatible with the `RestrictedPodSecurityProvider`.
 When the restricted profile is enabled, incompatible Kafka Connect build configurations are rejected rather than executed with elevated permissions.
 
 **Custom CA certificates.**
