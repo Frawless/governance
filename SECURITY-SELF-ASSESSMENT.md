@@ -77,6 +77,8 @@ It automates the deployment, configuration, management, and security of Apache K
 
 Apache Kafka is a distributed event streaming platform used by thousands of organizations for high-throughput, fault-tolerant data pipelines and streaming analytics.
 Running Kafka on Kubernetes introduces specific security challenges: stateful workloads require persistent identity and stable networking, multi-port communication between brokers demands careful network policy management, and certificate management at scale becomes critical when every broker, controller, and client needs its own TLS certificate.
+Communication between nodes within a Kafka cluster (controllers to controllers, brokers to controllers, brokers to brokers) adds an additional layer of complexity.
+This makes some security designs more challenging than with other applications and has to be accounted for in implementation decisions.
 
 Strimzi addresses these challenges through the Kubernetes operator pattern.
 Operators extend the Kubernetes API with custom resources that describe the desired state of Kafka components, and reconciliation controllers continuously drive the actual state toward that desired state.
@@ -97,7 +99,7 @@ Prometheus metrics endpoints and health/readiness probes are served over plain H
 The Cluster Operator is the primary component of Strimzi.
 It watches for `Kafka`, `KafkaNodePool`, `KafkaConnect`, `KafkaConnector`, `KafkaBridge`, `KafkaMirrorMaker2`, `KafkaRebalance`, and `StrimziPodSet` custom resources and reconciles the Kubernetes resources needed to run those components.
 The Cluster Operator can be configured to watch specific namespaces or all namespaces.
-Limiting the watched namespaces reduces the scope of namespace-level resources the operator can manage, but does not eliminate all cluster-scoped roles — ClusterRoles and some ClusterRoleBindings are required for privilege delegation and for reading cluster-scoped resources such as Nodes.
+Limiting the watched namespaces reduces the scope of cluster-wide resources the operator can manage, but does not eliminate all cluster-scoped roles — ClusterRoles and some ClusterRoleBindings are required for privilege delegation and for reading cluster-scoped resources such as Nodes.
 During reconciliation, it manages certificates and security configuration for inter-component communication — by default generating TLS certificates (or creating cert-manager `Certificate` CRs via [SIP-100](https://github.com/strimzi/proposals/blob/main/100-external-certificate-manager.md)), but encryption and authentication can be reconfigured or disabled entirely via [SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md) — creates NetworkPolicy resources to restrict traffic between pods, and delegates RBAC to operand service accounts.
 It uses seven ClusterRoles to implement least-privilege access control.
 
