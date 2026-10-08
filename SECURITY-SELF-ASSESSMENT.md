@@ -22,40 +22,24 @@
   * [Case Studies](#case-studies)
   * [Related Projects / Vendors](#related-projects--vendors)
 
-## TODOs
-
-There are a couple of TODOs that should be revisited and resolved before proposing the file into governance repo.
-The following list of proposals should be implemented before we will introduce final version of this document.
-We should also agree on `Configurable Security for Kafka Connect Internal Communication` thing as it can be considered as a security issue (proposal and implementation for this will be needed).
-
-| TODO                                                                                                             | Description                                                         | Status                     |
-|------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|----------------------------|
-| [SIP-100](https://github.com/strimzi/proposals/blob/main/100-external-certificate-manager.md)                    | External Certificate Manager - Cert-Manager integration             | Implementation in-progress |
-| [SIP-144](https://github.com/strimzi/proposals/blob/main/144-Strimzi-Gatekeeper-plugin-system.md)                | Gatekeeper Plugin System                                            | Implementation In-progress |
-| [SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md) | Configurable Security of Internal Communication - Istio integration | Implementation In-progress |
-| [SIP-152](https://github.com/strimzi/proposals/pull/240)                                                         | Migrate Strimzi images from ubi9-minimal to ubi10-micro             | Proposal approved          |
-| KafkaConnect security limitations                                                                                | Configurable Security for Kafka Connect Internal Communication      | TODO                       |
-| KafkaExporter maintainability                                                                                    | What we will do with KE, update the doc if we agree on something    | TODO                       |
-| Updated all commit hashes and versions before submitting                                                         | -                                                                   | TODO                       |
-
 ## Metadata
 
-|                       |                                                                                                                                                                                                                                                                                                                         |
-|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Assessment Stage      | Draft                                                                                                                                                                                                                                                                                                                   |
-| Assessment Date       | 2026-07-26                                                                                                                                                                                                                                                                                                              |
-| Software              | [Strimzi](https://github.com/strimzi/strimzi-kafka-operator)                                                                                                                                                                                                                                                            |
-| Assessment Basis      | Strimzi `main` at `3c8319e0`                                                                                                                                                                                                                                                                                            |
-| Target Release        | Strimzi 1.3.0 or later                                                                                                                                                                                                                                                                                                  |
-| Release Status        | Unreleased                                                                                                                                                                                                                                                                                                              |
-| Kubernetes Versions   | 1.30+ (as supported by the assessed release)                                                                                                                                                                                                                                                                            |
-| Apache Kafka Versions | 4.2.0, 4.2.1, 4.3.0, 4.3.1 (default)                                                                                                                                                                                                                                                                                    |
-| Website               | https://strimzi.io                                                                                                                                                                                                                                                                                                      |
-| Security Provider     | No — Strimzi manages Apache Kafka on Kubernetes; it is not a security product                                                                                                                                                                                                                                           |
-| Languages             | Java 21                                                                                                                                                                                                                                                                                                                 |
-| SBOM                  | Published per release via Syft, attached as attestations to container images using Sigstore                                                                                                                                                                                                                             |
-| Included Repositories | [strimzi-kafka-operator](https://github.com/strimzi/strimzi-kafka-operator) (1.3.0), [drain-cleaner](https://github.com/strimzi/drain-cleaner) (1.7.0), [strimzi-kafka-bridge](https://github.com/strimzi/strimzi-kafka-bridge) (1.1.0), [strimzi-kafka-oauth](https://github.com/strimzi/strimzi-kafka-oauth) (0.18.0) |
-| Excluded from Scope   | Kubernetes control plane, CNI plugins, CSI drivers, external identity providers, third-party Kafka Connect plugins, client applications, cert-manager deployment                                                                                                                                                        |
+|                       |                                                                                                                                                                                                                                                                                                                                 |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Assessment Stage      | Complete                                                                                                                                                                                                                                                                                                                        |
+| Assessment Date       | 2026-10-08                                                                                                                                                                                                                                                                                                                      |
+| Software              | [Strimzi](https://github.com/strimzi/strimzi-kafka-operator)                                                                                                                                                                                                                                                                    |
+| Assessment Basis      | Strimzi `release-1.3.x` branch                                                                                                                                                                                                                                                                                                  |
+| Target Release        | Strimzi 1.3.0                                                                                                                                                                                                                                                                                                                   |
+| Release Status        | Released                                                                                                                                                                                                                                                                                                                        |
+| Kubernetes Versions   | 1.32+ (as supported by the assessed release)                                                                                                                                                                                                                                                                                    |
+| Apache Kafka Versions | 4.2.0, 4.2.1, 4.2.2, 4.3.0, 4.3.1 (default)                                                                                                                                                                                                                                                                                   |
+| Website               | https://strimzi.io                                                                                                                                                                                                                                                                                                              |
+| Security Provider     | No — Strimzi manages Apache Kafka on Kubernetes; it is not a security product                                                                                                                                                                                                                                                   |
+| Languages             | Java 21                                                                                                                                                                                                                                                                                                                         |
+| SBOM                  | Published per release via Syft, attached as attestations to container images using Sigstore                                                                                                                                                                                                                                     |
+| Included Repositories | [strimzi-kafka-operator](https://github.com/strimzi/strimzi-kafka-operator) (1.3.0), [drain-cleaner](https://github.com/strimzi/drain-cleaner) (1.6.1), [strimzi-kafka-bridge](https://github.com/strimzi/strimzi-kafka-bridge) (1.2.0), [strimzi-kafka-oauth](https://github.com/strimzi/strimzi-kafka-oauth) (0.18.0), [metrics-reporter](https://github.com/strimzi/metrics-reporter) (0.4.0) |
+| Excluded from Scope   | Kubernetes control plane, CNI plugins, CSI drivers, external identity providers, third-party Kafka Connect plugins, client applications, cert-manager deployment                                                                                                                                                                |
 
 ### Security Links
 
@@ -88,7 +72,7 @@ Strimzi's operators handle the operational complexity of running Kafka securely 
 
 Strimzi consists of operators and managed operands that may run in separate pods (Cluster operator) or as multiple containers within a shared pod (Topic and User operators within Entity operator pod).
 Components use dedicated Kubernetes ServiceAccounts.
-Security properties vary by interface: Kafka-protocol connections, Kubernetes API access, component REST APIs, HTTP APIs, metrics endpoints, and health endpoints have independent security configurations.
+Security properties vary by interface: Kafka-protocol connections, Kubernetes API access, REST APIs, metrics endpoints, and health endpoints have independent security configurations.
 Strimzi manages TLS certificates for internal Kafka-facing connections by default.
 Both encryption and authentication for internal communication are configurable via the `strimzi.io/internal-cluster-security` annotation (see [SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)) and can be optionally disabled by users. 
 Other interfaces have independent or user-configurable controls.
@@ -138,6 +122,8 @@ It runs as a separate Deployment managed by the Cluster Operator.
 The Bridge exposes an inbound HTTP API that is a separate trust boundary with its own TLS configuration; TLS for inbound HTTP clients is supported but HTTP-level authentication for inbound clients is not provided by the Bridge itself and must be implemented externally (reverse proxy, API gateway, or network policy).
 The outbound connection to the Kafka cluster supports TLS and configurable authentication.
 
+**Custom Resources:** `KafkaBridge`
+
 #### Kafka Connect
 
 Kafka Connect runs connector plugins that stream data between Kafka and external systems.
@@ -149,9 +135,14 @@ The generated NetworkPolicy restricts the REST API port (8083) to the Cluster Op
 Deployments should prefer `KafkaConnector` custom resources for Kubernetes-RBAC-mediated management and avoid external exposure of the REST API unless an authenticated proxy or equivalent control is used.
 Connector plugins execute third-party code with the permissions and network access of the Connect workload and must be treated as trusted code.
 
+The configurable internal cluster security ([SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)) applies only to the Kafka cluster itself (brokers, controllers, and internal operators).
+It does not cover worker-to-worker communication between Kafka Connect pods or the internal Connect REST API (port 8083).
+The REST API remains unauthenticated within its NetworkPolicy-enforced boundary.
+
 Kafka Connect includes a build functionality that uses `Buildah` to create container images with additional connector plugins.
-To use this feature the build pods require elevated privileges that are less strict than `RestrictedPodSecurityProvider`.
-These can be configured within KafkaConnect custom resource.
+As of Strimzi 1.3.0, the `UseConnectBuildWithBuildah` feature gate has moved to GA stage and is the only supported build method — the previous Kaniko-based path has been removed.
+Build pods require elevated privileges that are less strict than `RestrictedPodSecurityProvider`.
+These can be configured within the `KafkaConnect` custom resource.
 
 **Custom Resources:** `KafkaConnector`
 
@@ -176,16 +167,19 @@ Kafka MirrorMaker 2 provides cross-cluster data replication for disaster recover
 Strimzi deploys MirrorMaker 2 as a Kafka Connect cluster with pre-configured MirrorMaker connectors, and it inherits the Kafka Connect runtime and REST API trust boundaries.
 Each source and target Kafka cluster connection is independently configured and may use TLS, mTLS, SCRAM-SHA-512, or other supported authentication modes.
 The Cluster Operator manages the deployment through the `KafkaMirrorMaker2` custom resource.
+As with Kafka Connect, the internal worker-to-worker communication and embedded REST API are not covered by SIP-150 configurable cluster security and remain protected only by NetworkPolicy.
 
 **Custom Resources:** `KafkaMirrorMaker2`
 
 #### Kafka Exporter
 
-The Kafka Exporter uses Kafka APIs to read consumer-group and topic metadata and exposes the resulting metrics in Prometheus format.
+The Kafka Exporter (version 1.10.0 in Strimzi 1.3.0) uses Kafka APIs to read consumer-group and topic metadata and exposes the resulting metrics in Prometheus format.
 It runs as a separate Deployment, connecting to the internal replication listener (port 9091) using mTLS.
 When Kafka authorization is enabled, the Exporter's identity (`User:CN=<cluster>-kafka-exporter,O=io.strimzi`) is automatically added to `super.users` in the broker configuration, bypassing all ACLs.
 This is necessary for the Exporter to read metadata without requiring per-topic ACL grants, but means a compromised Exporter pod has unrestricted access to the Kafka cluster.
 The Exporter supplements the JMX metrics exposed natively by Kafka brokers with consumer-centric lag metrics critical for operational monitoring.
+A new tool for additional Kafka metrics called Sova has been approved ([proposal #245](https://github.com/strimzi/proposals/pull/245)) and is targeted for future Strimzi releases.
+Eventually this tool should replace Kafka Exporter.
 
 #### Drain Cleaner
 
@@ -202,7 +196,7 @@ RBAC is implemented through seven ClusterRoles for the Cluster Operator and its 
 * `strimzi-cluster-operator-global` — permissions for managing cluster-scoped resources such as ClusterRoleBindings
 * `strimzi-cluster-operator-leader-election` — permissions for leader election via Kubernetes Leases
 * `strimzi-cluster-operator-watched` — permissions for watching custom resources across namespaces
-* `strimzi-kafka-broker` — delegated to Kafka broker pods for node awareness (rack-aware replica placement)
+* `strimzi-kafka-broker` — delegated to Kafka node pods for node awareness (rack-aware replica placement)
 * `strimzi-entity-operator` — delegated to the Entity Operator for managing KafkaTopic and KafkaUser resources
 * `strimzi-kafka-client` — delegated to Kafka client pods (Connect, MirrorMaker 2) for node awareness (rack-aware consumption)
 
@@ -251,6 +245,9 @@ For TLS authentication, it generates a client certificate signed by the Clients 
 For SCRAM-SHA-512 authentication, it generates a random password and stores it in a Secret.
 The User Operator then configures the corresponding ACLs and quotas in Kafka.
 All credential storage uses Kubernetes Secrets with the operator managing the full lifecycle, including renewal for TLS credentials.
+
+The PKCS12 format for credential Secrets is deprecated as of Strimzi 1.3.0.
+PEM will be the only supported format in a future releases.
 
 #### Listener Security Configuration
 
@@ -307,7 +304,7 @@ The Cluster Operator generates listener-specific NetworkPolicy rules; source res
 * Strimzi does not manage external access security beyond listener-level TLS and authentication configuration
 * Strimzi does not secure external load balancers, ingress controllers, Routes, Gateway implementations, DNS, or upstream firewalls
 * Strimzi does not guarantee client certificate reload or application-side credential rotation
-* Strimzi does not enforce pod security standards on the Kubernetes cluster; it provides a `RestrictedPodSecurityProvider` (default as of 1.2.0) and a `BaselinePodSecurityProvider` that can be configured when the restricted profile is incompatible with a workload
+* Strimzi does not enforce pod security standards on the Kubernetes cluster; the default pod security provider for managed operands is `BaselinePodSecurityProvider`; a `RestrictedPodSecurityProvider` is available and can be configured when the environment supports it (as of 1.2.0, the operator's own Deployment uses a restricted security context by default)
 * Strimzi does not validate the security of custom Gatekeeper plugins; plugins execute as trusted code within the operator process
 * Strimzi does not manage the cert-manager deployment or its Issuers; cert-manager availability and configuration are the cluster administrator's responsibility
 
@@ -331,9 +328,11 @@ For additional context on how these features interact across components, see the
 
 ### Critical
 
-**Configurable internal communication security ([SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)).**
-Communication between Strimzi-managed components is configured with TLS encryption and mTLS authentication by default.
-Encryption (`strimzi-tls` or `none`) and authentication (`strimzi-mtls`, `kubernetes-sa`, or `none`) can be configured independently to support service mesh integration or performance optimization in isolated environments.
+**Configurable internal communication security ([SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)) — Early Access in 1.3.0.**
+Communication between Strimzi-managed Kafka cluster components (brokers, controllers, Cluster Operator, Entity Operator, Cruise Control, Kafka Exporter, and Kafka Agent) is configured with TLS encryption and mTLS authentication by default.
+As of Strimzi 1.3.0 (Early Access - not recommended for production use), encryption (`tls` or `none`) and authentication (`mtls`, `service-account`, or `none`) can be configured independently via the `strimzi.io/internal-cluster-security` annotation to support service mesh integration or performance optimization in isolated environments.
+This feature applies to Strimzi internal connections only. 
+It does not extend to Kafka Connect or MirrorMaker 2 worker-to-worker communication.
 
 The Kubernetes ServiceAccount authentication mode uses short-lived, audience-scoped OAUTHBEARER tokens (via [strimzi-kafka-oauth](https://github.com/strimzi/strimzi-kafka-oauth)) as an alternative to mTLS certificates.
 
@@ -361,8 +360,8 @@ Enforcement depends on the Kubernetes cluster's CNI plugin.
 
 **Non-root container execution.**
 Strimzi-provided container images run as non-root with UID 1001 by default.
-As of Strimzi 1.2.0, the operator installation files and Helm chart use the `RestrictedPodSecurityProvider` by default, enforcing `runAsNonRoot`, dropping all capabilities, and enabling the `RuntimeDefault` seccomp profile.
-The `BaselinePodSecurityProvider` remains available and can be configured if the restricted profile is incompatible with a workload.
+The default pod security provider for managed operands is `BaselinePodSecurityProvider`.
+The `RestrictedPodSecurityProvider` is available for environments that support the restricted Kubernetes pod security profile; as of Strimzi 1.2.0, the operator's own Deployment uses a restricted security context in the installation files and Helm chart.
 Template overrides in custom resources can modify these defaults.
 
 ### Security Relevant
@@ -374,11 +373,18 @@ Each Kafka listener can be configured with its own authentication mechanism: mTL
 Kafka authorization is configured at the cluster level through the broker authorizer using the `simple` built-in model or `custom` authorizer plugins.
 
 **RestrictedPodSecurityProvider.**
-The default pod security profile (as of 1.2.0) that sets `allowPrivilegeEscalation` to `false`, drops all Linux capabilities, enables the `RuntimeDefault` seccomp profile, and enforces `runAsNonRoot`.
+An optional pod security profile that sets `allowPrivilegeEscalation` to `false`, drops all Linux capabilities, enables the `RuntimeDefault` seccomp profile, and enforces `runAsNonRoot`.
 
 Kafka Connect build security requirements depend on Kubernetes platform.
-`Buildah` require elevated privileges and security-context settings that are incompatible with the `RestrictedPodSecurityProvider`.
+`Buildah` requires elevated privileges and security-context settings that are incompatible with the `RestrictedPodSecurityProvider`.
 When the restricted profile is enabled, incompatible Kafka Connect build configurations are rejected rather than executed with elevated permissions.
+
+**Kafka Connect and MirrorMaker 2 worker-to-worker security limitation.**
+The configurable internal cluster security ([SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)) applies only to the Kafka cluster itself — Kafka brokers, controllers, and the internal operators that communicate with them.
+It does not extend to communication between Kafka Connect worker pods or between MirrorMaker 2 worker pods.
+Worker-to-worker traffic (used for task coordination and distributed mode offset management) is not encrypted or authenticated by Strimzi.
+The internal Connect REST API (port 8083) likewise has no HTTP-level authentication; access is constrained only by the generated NetworkPolicy, which restricts port 8083 to the Cluster Operator and Connect pods.
+Environments with strict lateral-movement requirements should layer an authenticated proxy, a service mesh, or Kubernetes NetworkPolicy with tighter peer selectors in front of Kafka Connect and MirrorMaker 2 worker pods.
 
 **Custom CA certificates.**
 Users can provide their own CA certificates through Kubernetes Secrets, allowing Strimzi to integrate with existing PKI infrastructure.
@@ -402,17 +408,16 @@ Mutating plugins can alter the effective custom-resource configuration used duri
 As a result, Kubernetes API audit logs record the submitted resource but not necessarily the effective post-plugin configuration.
 Operators should use trusted plugins and retain appropriate Cluster Operator logs where an audit trail of plugin decisions is required.
 
-**Kubernetes ServiceAccount authentication ([SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)).**
+**Kubernetes ServiceAccount authentication ([SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)) — Early Access in 1.3.0.**
 An alternative to mTLS for internal Kafka authentication using short-lived, audience-scoped Kubernetes ServiceAccount tokens via the OAUTHBEARER SASL mechanism.
 Tokens are scoped to a specific Strimzi audience to prevent cross-cluster reuse.
+This authentication mode is available as part of the SIP-150 Early Access feature in 1.3.0 and is not recommended for production use.
 
-**cert-manager integration ([SIP-100](https://github.com/strimzi/proposals/blob/main/100-external-certificate-manager.md)).**
+**cert-manager integration ([SIP-100](https://github.com/strimzi/proposals/blob/main/100-external-certificate-manager.md)) — Early Access in 1.3.0.**
 Allows delegating end-entity certificate issuance to cert-manager instead of the built-in CA.
-Each CA (Cluster CA, Clients CA) can independently use the built-in Strimzi CA or cert-manager.
-When using cert-manager, Strimzi never holds CA private keys.
-
-**ubi10-micro base images.**
-Strimzi uses ubi10-micro base images to reduce the number of installed packages and the container attack surface compared with the previous ubi9-minimal images.
+Each CA (Cluster CA, Clients CA) can independently use the built-in Strimzi CA or cert-manager, allowing gradual adoption.
+When using cert-manager, Strimzi never holds CA private keys — the user provides a cert-manager Issuer reference and the CA public certificate, and cert-manager handles issuance and renewal.
+This feature is available as Early Access in 1.3.0 and is not recommended for production use.
 
 ## Project Compliance
 
@@ -447,7 +452,7 @@ All pull requests require approval from at least two maintainers, or one maintai
 
 ### Communication Channels
 
-* **Internal**: CNCF Slack #strimzi-dev for developer coordination, private maintainer channel for security-sensitive topics, cncf-strimzi-maintainers mailing list
+* **Internal**: CNCF Slack #strimzi-dev for developer coordination, private maintainer channel for security-sensitive topics, cncf-strimzi-maintainers mailing list, strimzi-dev mailing list
 * **Inbound**: GitHub Issues for bug reports and feature requests, CNCF Slack #strimzi for user questions, strimzi-users mailing list, security vulnerabilities via [cncf-strimzi-maintainers@lists.cncf.io](mailto:cncf-strimzi-maintainers@lists.cncf.io)
 * **Outbound**: GitHub Releases for release announcements, CNCF mailing list for community updates, [Strimzi blog](https://strimzi.io/blog/) for technical articles, GitHub Security Advisories for vulnerability disclosures
 
@@ -525,15 +530,15 @@ Rajith Attapattu from Randoli presented at [StrimziCon 2026](https://strimzi.io/
 
 ### Related Projects / Vendors
 
-**Confluent Operator** is a commercial Kubernetes operator provided by Confluent for deploying Confluent Platform.
-Unlike Strimzi, which manages open-source Apache Kafka, Confluent Operator is designed specifically for the commercial Confluent distribution and requires a Confluent subscription.
-
-**Koperator** (formerly MSKope, by Banzai Cloud) was an open-source Kafka operator for Kubernetes.
-The project has been archived and is no longer actively maintained.
-
 Several vendors build commercial products on top of Strimzi:
 
 * **Red Hat** — [Streams for Apache Kafka](https://developers.redhat.com/products/streams-for-apache-kafka/overview)
 * **Cloudera** — [Stream Messaging](https://docs.cloudera.com/csm-operator/1.4/index.html)
 * **Axual** — Kafka platform built on Strimzi
 * **Ænix** — Kafka as a Service in [Cozystack](https://cozystack.io)
+
+**Confluent Operator** is a commercial Kubernetes operator provided by Confluent for deploying Confluent Platform.
+Unlike Strimzi, which manages open-source Apache Kafka, Confluent Operator is designed specifically for the commercial Confluent distribution and requires a Confluent subscription.
+
+**Koperator** (formerly MSKope, by Banzai Cloud) was an open-source Kafka operator for Kubernetes.
+The project has been archived and is no longer actively maintained.
