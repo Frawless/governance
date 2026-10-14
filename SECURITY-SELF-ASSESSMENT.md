@@ -148,11 +148,11 @@ These can be configured within the `KafkaConnect` custom resource.
 
 #### Kafka Agent
 
-The Kafka Agent is a Java agent embedded in the Kafka broker JVM via the `-javaagent:` mechanism.
-It runs within the same broker container process — not as a separate sidecar container.
-It exposes the broker's readiness status and metadata over HTTPS on port 8443.
+The Kafka Agent is a Java agent embedded in the Kafka node JVM via the `-javaagent:` mechanism.
+It runs within the same Kafka node container process — not as a separate sidecar container.
+It exposes the Kafka node's readiness status and metadata over HTTPS on port 8443.
 Only the Cluster Operator communicates with the Kafka Agent, and this communication is secured with mTLS.
-The Agent enables the Cluster Operator to monitor broker health and coordinate rolling updates without direct access to the Kafka protocol.
+The Agent enables the Cluster Operator to monitor Kafka node health and coordinate rolling updates without direct access to the Kafka protocol.
 
 #### Cruise Control
 
