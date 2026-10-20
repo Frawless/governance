@@ -70,7 +70,8 @@ Strimzi's operators handle the operational complexity of running Kafka securely 
 
 ### Actors
 
-Strimzi consists of operators and managed operands that may run in separate pods (Cluster operator) or as multiple containers within a shared pod (Topic and User operators within Entity operator pod).
+Strimzi consists of operators and managed operands.
+Operators may run as standalone Deployments (the Cluster Operator) or as multiple containers within a shared pod (the Topic Operator and User Operator run together within the Entity Operator pod).
 Components use dedicated Kubernetes ServiceAccounts.
 Security properties vary by interface: Kafka-protocol connections, Kubernetes API access, REST APIs, metrics endpoints, and health endpoints have independent security configurations.
 Strimzi manages TLS certificates for internal Kafka-facing connections by default.
@@ -85,7 +86,7 @@ It watches for `Kafka`, `KafkaNodePool`, `KafkaConnect`, `KafkaConnector`, `Kafk
 The Cluster Operator can be configured to watch specific namespaces or all namespaces.
 Limiting the watched namespaces reduces the scope of cluster-wide resources the operator can manage, but does not eliminate all cluster-scoped roles — ClusterRoles and some ClusterRoleBindings are required for privilege delegation and for reading cluster-scoped resources such as Nodes.
 During reconciliation, it manages certificates and security configuration for inter-component communication — by default generating TLS certificates (or creating cert-manager `Certificate` CRs via [SIP-100](https://github.com/strimzi/proposals/blob/main/100-external-certificate-manager.md)), but encryption and authentication can be reconfigured or disabled entirely via [SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md) — creates NetworkPolicy resources to restrict traffic between pods, and delegates RBAC to operand service accounts.
-It uses seven ClusterRoles to implement least-privilege access control.
+It uses seven Roles/ClusterRoles to implement least-privilege access control.
 
 Kafka pods are managed through `StrimziPodSet` custom resources, a Strimzi-internal alternative to StatefulSets that provides finer control over pod lifecycle during rolling updates and scaling.
 Reconciliation can be extended through the [Gatekeeper plugin system](https://github.com/strimzi/proposals/blob/main/144-Strimzi-Gatekeeper-plugin-system.md) (SIP-144), which supports validating and mutating plugins that can inspect or modify custom resources before and after reconciliation.
@@ -96,7 +97,7 @@ Reconciliation can be extended through the [Gatekeeper plugin system](https://gi
 
 The Topic Operator is an optional component that manages `KafkaTopic` custom resources, creating, updating, and deleting Kafka topics to match the desired state declared in Kubernetes.
 It can be enabled and configured via the `Kafka` CR.
-It can run in two modes: as a container within the Entity Operator pod alongside the User Operator when deployed as part of a Strimzi-managed Kafka cluster, or as a standalone deployment connecting to an external Kafka cluster.
+It can run in two modes: as a container within the Entity Operator pod alongside the User Operator when deployed as part of a Strimzi-managed Kafka cluster, or as a standalone deployment connecting to an external Kafka cluster not managed by Strimzi.
 When deployed as part of a Strimzi-managed Kafka cluster, the security of the Kafka connection follows the cluster security configuration set via the `strimzi.io/internal-cluster-security` annotation: mTLS by default, but encryption and authentication are independently configurable and can each be disabled (see [SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)).
 In standalone mode, communication is secured via mTLS using certificates provided by the user.
 The Topic Operator operates within a single namespace and uses the Kafka Admin API to create, alter, and delete topics.
@@ -109,7 +110,7 @@ The User Operator is an optional component that manages `KafkaUser` custom resou
 It can be enabled and configured via the `Kafka` CR.
 It creates TLS client certificates or SCRAM-SHA-512 passwords and stores them as Kubernetes Secrets in the same namespace as the KafkaUser resource.
 The User Operator synchronizes ACL rules and quotas to Kafka, ensuring that the Kafka-side configuration matches the declared desired state.
-Like the Topic Operator, it supports two deployment modes: within the Entity Operator pod as part of a Strimzi-managed Kafka cluster, or as a standalone deployment connecting to an external Kafka cluster.
+Like the Topic Operator, it supports two deployment modes: within the Entity Operator pod as part of a Strimzi-managed Kafka cluster, or as a standalone deployment connecting to an external Kafka cluster not managed by Strimzi.
 When deployed as part of a Strimzi-managed Kafka cluster, the security of the Kafka connection follows the cluster security configuration set via the `strimzi.io/internal-cluster-security` annotation: mTLS by default, but encryption and authentication are independently configurable and can each be disabled (see [SIP-150](https://github.com/strimzi/proposals/blob/main/150-configurable-security-of-internal-communication.md)).
 In standalone mode, it communicates with Kafka via mTLS.
 
@@ -124,7 +125,7 @@ The outbound connection to the Kafka cluster supports TLS and configurable authe
 
 **Custom Resources:** `KafkaBridge`
 
-#### Kafka Connect
+#### Kafka Connect connectors
 
 Kafka Connect runs connector plugins that stream data between Kafka and external systems.
 Strimzi manages Kafka Connect worker pods through an internal `StrimziPodSet`.
@@ -151,7 +152,7 @@ These can be configured within the `KafkaConnect` custom resource.
 The Kafka Agent is a Java agent embedded in the Kafka node JVM via the `-javaagent:` mechanism.
 It runs within the same Kafka node container process — not as a separate sidecar container.
 It exposes the Kafka node's readiness status and metadata over HTTPS on port 8443.
-Only the Cluster Operator communicates with the Kafka Agent, and this communication is secured with mTLS.
+Only the Cluster Operator communicates with the Kafka Agent, and this communication is secured in the same way as the communication between the Kafka nodes.
 The Agent enables the Cluster Operator to monitor Kafka node health and coordinate rolling updates without direct access to the Kafka protocol.
 
 #### Cruise Control
@@ -159,7 +160,7 @@ The Agent enables the Cluster Operator to monitor Kafka node health and coordina
 Cruise Control is an automated Kafka cluster rebalancing engine that Strimzi integrates to optimize partition distribution across brokers.
 It runs as a separate Deployment managed by the Cluster Operator.
 Users interact with Cruise Control through `KafkaRebalance` custom resources, which trigger rebalancing proposals and approvals.
-Communication between Cruise Control and the Cluster Operator is secured via mTLS.
+Communication between Cruise Control and the Cluster Operator is secured in the same way as the other internal communication within the Kafka cluster.
 
 #### Kafka MirrorMaker 2
 
@@ -190,7 +191,7 @@ When a Kafka pod is about to be evicted, the Drain Cleaner annotates the pod to 
 ### Isolation
 
 Strimzi isolates its actors through multiple mechanisms.
-RBAC is implemented through seven ClusterRoles for the Cluster Operator and its operands, following the principle of least privilege (additional ClusterRoles exist for the Drain Cleaner, and optional admin/view roles):
+RBAC is implemented through seven Roles/ClusterRoles for the Cluster Operator and its operands, following the principle of least privilege (additional ClusterRoles exist for the Drain Cleaner, and optional admin/view roles):
 
 * `strimzi-cluster-operator-namespaced` — permissions for managing operand resources within watched namespaces
 * `strimzi-cluster-operator-global` — permissions for managing cluster-scoped resources such as ClusterRoleBindings
